@@ -46,6 +46,7 @@ class ViewController: UIViewController, UITableViewDataSource, UISearchBarDelega
         // Do any additional setup after loading the view.
         
         countryTableView.dataSource = self
+        countryTableView.delegate=self
         parseData()
         searchMth()
     }
@@ -95,10 +96,16 @@ class ViewController: UIViewController, UITableViewDataSource, UISearchBarDelega
         return cell
     }
     
-    private func tableView(_ tableView: MyTableViewCell, didSelectRowAt indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+            return 100
+        }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("ici")
         if let vc = (storyboard!.instantiateViewController(withIdentifier: "SecondViewController")) as?
             SecondViewController{
+            vc.country = fetchCountry[indexPath.row]
+            
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }

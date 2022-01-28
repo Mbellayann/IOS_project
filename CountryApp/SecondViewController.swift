@@ -7,16 +7,42 @@
 
 import UIKit
 
-class SecondViewController: UIViewController {
-
+class MySecondTableViewCell: UITableViewCell {
     
-    @IBOutlet weak var lnl_name: UILabel!
+    @IBOutlet weak var title: UILabel!
+    
+}
+
+class SecondViewController: UIViewController, UITableViewDataSource,UITableViewDelegate{
+
+    @IBOutlet weak var detailView: UITableView!
+    
     @IBOutlet weak var img: UIImageView!
+    
+    var country = Country()
+    
+    
+    let titles = ["Official Name","Capital","Area","Population","Currency","Region","Timezone","Languages","GPS Position"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        detailView.dataSource = self
+        detailView.delegate = self
         // Do any additional setup after loading the view.
+        //verified if all items coming from th efirst screen are nil 
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return titles.count
+        }
+        
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell=tableView.dequeueReusableCell(withIdentifier: "cell") as! MySecondTableViewCell
+        cell.title.text = "yann"
+        print("salut")
+        return cell
+        
     }
 
 }
