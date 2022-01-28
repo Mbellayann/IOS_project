@@ -10,6 +10,9 @@ import UIKit
 class MyTableViewCell: UITableViewCell {
     @IBOutlet weak var imgView: UIImageView!
     
+    @IBOutlet weak var countryLabel: UILabel!
+    @IBOutlet weak var countryCode: UILabel!
+    
     func setImage(from url: String) {
         guard let imageURL = URL(string: url) else { return }
 
@@ -27,15 +30,16 @@ class MyTableViewCell: UITableViewCell {
 
 
 
-class ViewController: UIViewController, UITableViewDataSource {
+class ViewController: UIViewController, UITableViewDataSource, UISearchBarDelegate, UITableViewDelegate{
+    
     
     
     
     @IBOutlet weak var countryTableView: UITableView!
     
+    @IBOutlet weak var searchBar: UISearchBar!
     
     var fetchCountry = [Country]()
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,10 +47,38 @@ class ViewController: UIViewController, UITableViewDataSource {
         
         countryTableView.dataSource = self
         parseData()
+        searchMth()
     }
     
     override var prefersStatusBarHidden: Bool{
         return true
+    }
+    
+    func searchMth(){
+        let sB = UISearchBar(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50))
+        sB.delegate = self
+        sB.showsScopeBar = true
+        sB.tintColor = UIColor.lightGray
+        sB.scopeButtonTitles = ["Country", "capital"]
+        self.countryTableView.tableHeaderView = sB
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchText == "" {
+            parseData()
+        }else{
+            if searchBar.selectedScopeButtonIndex == 0 {
+                fetchCountry = fetchCountry.filter({(country) -> Bool in
+                    return  country.country!.lowercased().contains(searchText.lowercased())
+                })
+            }else{
+                fetchCountry = fetchCountry.filter({(country) -> Bool in
+                    return country.capital!.contains(searchText.lowercased())
+                })
+            }
+        }
+        self.countryTableView.reloadData()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
@@ -54,11 +86,21 @@ class ViewController: UIViewController, UITableViewDataSource {
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
         let cell = countryTableView.dequeueReusableCell(withIdentifier: "cell")as! MyTableViewCell
-        cell.textLabel?.text = fetchCountry[indexPath.row].country
-        cell.detailTextLabel?.text = fetchCountry[indexPath.row].capital
+        cell.countryLabel?.text = fetchCountry[indexPath.row].country
+        
+        cell.countryCode?.text = fetchCountry[indexPath.row].alpha2Code
+        
         let urlString  = fetchCountry[indexPath.row].flag!["png"]!
         cell.setImage(from: urlString)
         return cell
+    }
+    
+    private func tableView(_ tableView: MyTableViewCell, didSelectRowAt indexPath: NSIndexPath) {
+        print("ici")
+        if let vc = (storyboard!.instantiateViewController(withIdentifier: "SecondViewController")) as?
+            SecondViewController{
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
     
     func parseData(){
@@ -90,8 +132,9 @@ class ViewController: UIViewController, UITableViewDataSource {
                             capital = eachCountry["capital"] as! String
                         }
                         let flag = eachCountry["flags"]
+                        let code = eachCountry["alpha2Code"] as! String
                         
-                        self.fetchCountry.append(Country(country: country, capital: capital, flags: flag as! [String : String]))
+                        self.fetchCountry.append(Country(country: country, capital: capital, flags: flag as! [String : String], alpha2Code: code))
                     }
                     self.countryTableView.reloadData()
                 }
@@ -108,12 +151,14 @@ class Country {
     var country : String?
     var capital : String?
     var flag : [String:String]?
+    var alpha2Code : String?
     
-    init(country : String? = nil , capital : String? = nil , flags : [String:String]? = nil)
+    init(country : String? = nil , capital : String? = nil , flags : [String:String]? = nil, alpha2Code : String? = nil)
     {
         self.country = country
         self.capital = capital
         self.flag = flags
+        self.alpha2Code = alpha2Code
     }
     
 }
