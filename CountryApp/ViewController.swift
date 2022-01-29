@@ -23,6 +23,7 @@ class MyTableViewCell: UITableViewCell {
             let image = UIImage(data: imageData)
             DispatchQueue.main.async {
                 self.imgView.image = image
+                self.imgView.layer.cornerRadius = 25
             }
         }
     }
@@ -60,7 +61,7 @@ class ViewController: UIViewController, UITableViewDataSource, UISearchBarDelega
         sB.delegate = self
         sB.showsScopeBar = true
         sB.tintColor = UIColor.lightGray
-        sB.scopeButtonTitles = ["Country", "capital"]
+        sB.scopeButtonTitles = ["Country", "Code"]
         self.countryTableView.tableHeaderView = sB
     }
     
@@ -75,7 +76,7 @@ class ViewController: UIViewController, UITableViewDataSource, UISearchBarDelega
                 })
             }else{
                 fetchCountry = fetchCountry.filter({(country) -> Bool in
-                    return country.capital!.contains(searchText.lowercased())
+                    return country.alpha2Code!.contains(searchText.uppercased())
                 })
             }
         }
@@ -104,7 +105,7 @@ class ViewController: UIViewController, UITableViewDataSource, UISearchBarDelega
         print("ici")
         if let vc = (storyboard!.instantiateViewController(withIdentifier: "SecondViewController")) as?
             SecondViewController{
-            vc.country = fetchCountry[indexPath.row]
+            vc.country = (fetchCountry[indexPath.row])
             
             self.navigationController?.pushViewController(vc, animated: true)
         }
@@ -130,18 +131,29 @@ class ViewController: UIViewController, UITableViewDataSource, UISearchBarDelega
                         let eachCountry = eachfetchCountry as! [String : Any]
                         let country = eachCountry["name"] as! String
                         //print(country)
-                        let capital : String
+                        let capital : String?
                         if(eachCountry["capital"] == nil)
                         {
                             capital = "no capital"
                         }else
                         {
-                            capital = eachCountry["capital"] as! String
+                            capital = eachCountry["capital"] as? String
                         }
                         let flag = eachCountry["flags"]
                         let code = eachCountry["alpha2Code"] as! String
                         
-                        self.fetchCountry.append(Country(country: country, capital: capital, flags: flag as! [String : String], alpha2Code: code))
+                        let area = "\(String(describing: eachCountry["area"]))"
+                        let population = "\(String(describing: eachCountry["population"]))"
+                        let region = "\(String(describing: eachCountry["region"]))"
+                        let timezone = "\(String(describing: eachCountry["timezones"]))"
+                        let position = "\(String(describing: eachCountry["position"]))"
+                        
+                        self.fetchCountry.append(Country(country: country, capital: capital, flags: flag as? [String : String], alpha2Code: code,
+                                                       area: area,
+                                                        Population: population,
+                                                        Region: region,
+                                                        Timezone: timezone,
+                                                        Position: position))
                     }
                     self.countryTableView.reloadData()
                 }
@@ -160,12 +172,28 @@ class Country {
     var flag : [String:String]?
     var alpha2Code : String?
     
-    init(country : String? = nil , capital : String? = nil , flags : [String:String]? = nil, alpha2Code : String? = nil)
+    
+    var officialName : String?
+    var area : String?
+    var population : String?
+    var currency : String?
+    var region : String?
+    var timezone : String?
+    var languages : String?
+    var position : String?
+    
+    init(country : String? = nil , capital : String? = nil , flags : [String:String]? = nil, alpha2Code : String? = nil,
+         officialName : String? = nil, area : String? = nil, Population : String? = nil,  Region : String? = nil, Timezone : String? = nil, Position : String? = nil)
     {
         self.country = country
         self.capital = capital
         self.flag = flags
         self.alpha2Code = alpha2Code
+        self.area = area
+        self.population = Population
+        self.region = Region
+        self.timezone = Timezone
+        self.position = Position
     }
     
 }
